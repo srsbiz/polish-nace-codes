@@ -32,4 +32,26 @@ class PkdTest extends TestCase
         $this->assertTrue(Pkd::isValid('51.90.Z', Version::Pkd2004));
         $this->assertFalse(Pkd::isValid('51.90.Z', Version::Pkd2007));
     }
+
+    public function testItDoesNotSupportMigrationToVersion()
+    {
+        $this->expectException(\RuntimeException::class);
+        Pkd::migrate('51.90.Z', Version::Pkd2004, Version::Pkd2007);
+    }
+
+    public function testItDoesNotSupportMigrationFromVersion()
+    {
+        $this->expectException(\RuntimeException::class);
+        Pkd::migrate('51.90.Z', Version::Pkd2004, Version::Pkd2025);
+    }
+
+    public function testItDoesReturnPossibleMigrationOptions()
+    {
+        $hasNotChanged = Pkd::migrate($pkdNotChanged = '01.11.Z', Version::Pkd2007, Version::Pkd2025);
+        $this->assertEquals($pkdNotChanged, $hasNotChanged);
+
+        $hasSubstitutes = Pkd::migrate('62.01.Z', Version::Pkd2007, Version::Pkd2025);
+        $this->assertIsArray($hasSubstitutes);
+        $this->assertCount(2, $hasSubstitutes);
+    }
 }
