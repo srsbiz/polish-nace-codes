@@ -32,4 +32,36 @@ class PkdTest extends TestCase
         $this->assertTrue(Pkd::isValid('51.90.Z', Version::Pkd2004));
         $this->assertFalse(Pkd::isValid('51.90.Z', Version::Pkd2007));
     }
+
+    public function testItDoesNotSupportMigrationToVersion()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Pkd::migrate('51.90.Z', Version::Pkd2007, Version::Pkd2004);
+    }
+
+    public function testItDoesNotSupportMigrationFromVersion()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Pkd::migrate('51.90.Z', Version::Pkd2004, Version::Pkd2025);
+    }
+
+    public function testItDoesNotSupportUnknownPkd()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $null = Pkd::migrate('00.00.X', Version::Pkd2007, Version::Pkd2025);
+    }
+
+    public function testItDoesReturnPossibleMigrationOptions()
+    {
+        $hasNotChanged = Pkd::migrate($pkdNotChanged = '01.11.Z', Version::Pkd2007, Version::Pkd2025);
+        $this->assertEquals($pkdNotChanged, $hasNotChanged);
+
+        $hasSubstitutes = Pkd::migrate('62.01.Z', Version::Pkd2007, Version::Pkd2025);
+        $this->assertIsArray($hasSubstitutes);
+        $this->assertCount(2, $hasSubstitutes);
+
+        $migrateToPrevious = Pkd::migrate('62.20.A', Version::Pkd2025, Version::Pkd2007);
+        $this->assertIsArray($migrateToPrevious);
+        $this->assertCount(1, $migrateToPrevious);
+    }
 }

@@ -30,3 +30,22 @@ try {
     // Given PKD does not exist in this revision
 }
 ```
+
+To get possible substitutes:
+
+```php
+use SrsBiz\PolishNaceCodes\{Pkd, Version};
+
+try {
+    $pkd = '01.11.Z'
+    $substitutes = Pkd::migrate($pkd, Version::Pkd2007, Version::Pkd2025);
+    if ($pkd === $substitutes) {
+        // Meaning for given PKD was not changed
+    }
+    elseif (is_array($substitutes)) {
+        // List of possible substitutes 
+    }
+} catch (\InvalidArgumentException $exception) {
+    // Given PKD does not exist
+}
+```
