@@ -35,14 +35,20 @@ class PkdTest extends TestCase
 
     public function testItDoesNotSupportMigrationToVersion()
     {
-        $this->expectException(\RuntimeException::class);
-        Pkd::migrate('51.90.Z', Version::Pkd2004, Version::Pkd2007);
+        $this->expectException(\InvalidArgumentException::class);
+        Pkd::migrate('51.90.Z', Version::Pkd2007, Version::Pkd2004);
     }
 
     public function testItDoesNotSupportMigrationFromVersion()
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\InvalidArgumentException::class);
         Pkd::migrate('51.90.Z', Version::Pkd2004, Version::Pkd2025);
+    }
+
+    public function testItDoesNotSupportUnknownPkd()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $null = Pkd::migrate('00.00.X', Version::Pkd2007, Version::Pkd2025);
     }
 
     public function testItDoesReturnPossibleMigrationOptions()
@@ -53,5 +59,9 @@ class PkdTest extends TestCase
         $hasSubstitutes = Pkd::migrate('62.01.Z', Version::Pkd2007, Version::Pkd2025);
         $this->assertIsArray($hasSubstitutes);
         $this->assertCount(2, $hasSubstitutes);
+
+        $migrateToPrevious = Pkd::migrate('62.20.A', Version::Pkd2025, Version::Pkd2007);
+        $this->assertIsArray($migrateToPrevious);
+        $this->assertCount(1, $migrateToPrevious);
     }
 }
